@@ -1,0 +1,168 @@
+﻿<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<title>Ninja Hardcore Kvíz 🥷</title>
+<style>
+body{
+    margin:0;
+    background:#0e0e0e;
+    color:white;
+    font-family:Arial;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+.box{
+    background:#1c1c1c;
+    padding:20px;
+    width:360px;
+    border-radius:12px;
+    box-shadow:0 0 30px black;
+}
+h2{text-align:center;}
+button{
+    width:100%;
+    padding:10px;
+    margin:6px 0;
+    background:#333;
+    color:white;
+    border:none;
+    border-radius:8px;
+    font-size:15px;
+    cursor:pointer;
+}
+button:hover{background:#555;}
+.correct{background:green;}
+.wrong{background:crimson;}
+.timer{
+    text-align:center;
+    font-size:18px;
+    margin-bottom:8px;
+}
+.hidden{display:none;}
+</style>
+</head>
+<body>
+
+<div class="box">
+    <h2>🥷 Ninja Kvíz</h2>
+    <div class="timer">⏱️ <span id="time"></span>s</div>
+    <p id="q"></p>
+    <div id="a"></div>
+    <p id="info"></p>
+    <button id="next" class="hidden" onclick="nextLevel()">▶️ Další level</button>
+    <button id="retry" class="hidden" onclick="retry()">🔁 Opakovat level</button>
+</div>
+
+<script>
+let level = 1;
+let qIndex = 0;
+let levelScore = 0;
+let timer;
+let timeLeft = 10;
+
+const questions = [
+ {l:1,q:"Která hra má ender draka?",a:["Terraria","Minecraft","Roblox","Valheim"],c:1},
+ {l:1,q:"Kolik je 8×7?",a:["54","56","58","60"],c:1},
+ {l:1,q:"Která hra je MOBA?",a:["CS:GO","LoL","Minecraft","FIFA"],c:1},
+ {l:1,q:"Které anime má titány?",a:["Bleach","Naruto","Attack on Titan","One Piece"],c:2},
+ {l:1,q:"Kolik má krychle stěn?",a:["4","5","6","8"],c:2},
+
+ {l:2,q:"Která postava je z Naruta?",a:["Sasuke","Goku","Ichigo","Luffy"],c:0},
+ {l:2,q:"Kolik je 9×8?",a:["64","70","72","74"],c:2},
+ {l:2,q:"Která hra má spike plant?",a:["Valorant","Fortnite","Apex","Overwatch"],c:0},
+ {l:2,q:"Které anime má prokleté techniky?",a:["JJK","DBZ","Naruto","Pokémon"],c:0},
+ {l:2,q:"Kolik má člověk prstů?",a:["18","20","22","24"],c:1}
+];
+
+let levelQuestions = [];
+
+function startLevel(){
+    levelQuestions = questions.filter(q=>q.l===level).sort(()=>Math.random()-0.5);
+    qIndex = 0;
+    levelScore = 0;
+    document.getElementById("info").textContent="";
+    document.getElementById("next").classList.add("hidden");
+    document.getElementById("retry").classList.add("hidden");
+    load();
+}
+
+function load(){
+    clearInterval(timer);
+    timeLeft = 10;
+    document.getElementById("time").textContent = timeLeft;
+
+    timer = setInterval(()=>{
+        timeLeft--;
+        document.getElementById("time").textContent = timeLeft;
+        if(timeLeft<=0){
+            clearInterval(timer);
+            failLevel();
+        }
+    },1000);
+
+    const q = levelQuestions[qIndex];
+    document.getElementById("q").textContent =
+        `Level ${level} – otázka ${qIndex+1}/5: ${q.q}`;
+
+    const aDiv = document.getElementById("a");
+    aDiv.innerHTML="";
+    q.a.forEach((t,i)=>{
+        const b=document.createElement("button");
+        b.textContent=t;
+        b.onclick=()=>check(i,b);
+        aDiv.appendChild(b);
+    });
+}
+
+function check(i,btn){
+    clearInterval(timer);
+    const q = levelQuestions[qIndex];
+    if(i===q.c){
+        btn.classList.add("correct");
+        levelScore++;
+        qIndex++;
+        if(qIndex===5){
+            winLevel();
+        }else{
+            setTimeout(load,600);
+        }
+    }else{
+        btn.classList.add("wrong");
+        setTimeout(failLevel,600);
+    }
+}
+
+function winLevel(){
+    document.getElementById("q").textContent =
+        `✅ Level ${level} dokončen! Skóre: ${levelScore}/5`;
+    document.getElementById("a").innerHTML="";
+    document.getElementById("info").textContent =
+        "PERFECT RUN! Můžeš dál.";
+    document.getElementById("next").classList.remove("hidden");
+}
+
+function failLevel(){
+    clearInterval(timer);
+    document.getElementById("q").textContent =
+        `❌ Chyba! Level ${level} musíš zopakovat.`;
+    document.getElementById("a").innerHTML="";
+    document.getElementById("retry").classList.remove("hidden");
+}
+
+function nextLevel(){
+    level++;
+    startLevel();
+}
+
+function retry(){
+    startLevel();
+}
+
+startLevel();
+</script>
+
+</body>
+</html>
